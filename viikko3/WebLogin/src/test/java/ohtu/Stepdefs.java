@@ -23,6 +23,55 @@ public class Stepdefs {
         element.click();   
     }    
     
+    @Given("command new user is selected")
+    public void commandNewUserIsSelected() {
+        driver.get(baseUrl);
+        WebElement element = driver.findElement(By.linkText("register new user"));
+        element.click();
+    }       
+    
+    @Given("user with username {string} with password {string} is successfully created")
+    public void userWithUsernameWithPasswordIsSuccessfullyCreated(String username, String password) {
+        commandNewUserIsSelected();
+        signUp(username, password, password);
+    }
+
+    @Given("user with username {string} and password {string} is tried to be created")
+    public void userWithUsernameAndPasswordIsTriedToBeCreated(String username, String password) {
+        commandNewUserIsSelected();
+        signUp(username, password, password);
+    }
+    @Then("a new user is created")
+    public void aNewUserIsCreated() {
+        pageHasContent("Welcome to Ohtu Application!");
+    }
+
+    @When("a valid username {string} and password {string} and matching password confirmation are entered")
+    public void aValidUsernameAndPasswordAndMatchingPasswordConfirmationAreEntered(String username, String password) {
+        signUp(username, password, password);
+    }
+
+    @When("a too short username {string} and valid password {string} and matching password confirmation are entered")
+    public void aTooShortUsernameAndValidPasswordAndMatchingPasswordConfirmationAreEntered(String username, String password) {
+        signUp(username, password, password);
+    }
+
+    @When("a valid username {string} and too short password {string} and matching password confirmation are entered")
+    public void aValidUsernameAndTooShortPasswordAndMatchingPasswordConfirmationAreEntered(String username, String password) {
+        signUp(username, password, password);
+    }
+
+    @When("a valid username {string} and password {string} and not matching password confirmation {string} are entered")
+    public void aValidUsernameAndPasswordAndNotMatchingPasswordConfirmationAreEntered(String username, String password, String passwordConfirmation) {
+        signUp(username, password, passwordConfirmation);
+    }
+
+    @Then("user is not created and error {string} is reported")
+    public void userIsNotCratedAndErrorIsReported(String error) {
+        pageHasContent("Create username and give password");
+        pageHasContent(error);
+    }
+    
     @When("correct username {string} and password {string} are given")
     public void correctUsernameAndPasswordAreGiven(String username, String password) {
         logInWith(username, password);
@@ -36,7 +85,7 @@ public class Stepdefs {
     @When("correct username {string} and incorrect password {string} are given")
     public void correctUsernameAndIncorrectPasswordAreGiven(String username, String password) {
         logInWith(username, password);
-    }    
+    }
     
     @Then("user is not logged in and error message is given")
     public void userIsNotLoggedInAndErrorMessageIsGiven() {
@@ -54,12 +103,30 @@ public class Stepdefs {
         assertTrue(driver.getPageSource().contains(pageContent));
     }
     
+    @When("incorrect username {string} and password {string} are given")
+    public void incorrectUsernameAndPasswordAreGiven(String username, String password) {
+        logInWith(username, password);
+    }   
+    
     @After
     public void tearDown(){
         driver.quit();
     }
         
     /* helper methods */
+    
+    private void signUp(String username, String password, String passwordConfirmation) {
+        sleep(1);
+        assertTrue(driver.getPageSource().contains("Create username and give password"));
+        WebElement element = driver.findElement(By.name("username"));
+        element.sendKeys(username);
+        element = driver.findElement(By.name("password"));
+        element.sendKeys(password);
+        element = driver.findElement(By.name("passwordConfirmation"));
+        element.sendKeys(passwordConfirmation);
+        element = driver.findElement(By.name("signup"));
+        element.submit();
+    }
  
     private void pageHasContent(String content) {
         assertTrue(driver.getPageSource().contains(content));
@@ -74,4 +141,8 @@ public class Stepdefs {
         element = driver.findElement(By.name("login"));
         element.submit();  
     } 
+    
+    private void sleep(int seconds) {
+        try {Thread.sleep(seconds*1000);}catch(Exception e){};
+    }
 }
